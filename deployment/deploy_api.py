@@ -1,21 +1,22 @@
-from fastapi import FastAPI
+import os
 import joblib
+from fastapi import FastAPI
 import pandas as pd
 from pydantic import BaseModel
 
-# Initialize FastAPI app
 app = FastAPI()
 
-# Load trained model
-model = joblib.load("./models/xgboost.pkl")
+# ✅ Construct the correct model path
+model_path = os.path.join(os.path.dirname(__file__), "../models/xgboost.pkl")
+
+# ✅ Load trained model
+model = joblib.load(model_path)
 print("✅ Model loaded successfully!")
 
-# Root endpoint (Welcome Message)
 @app.get("/")
 def home():
     return {"message": "Welcome to the Credit Risk Prediction API! Use /predict/ for predictions."}
 
-# Define input data schema
 class CreditData(BaseModel):
     LIMIT_BAL: float
     SEX: int
@@ -41,7 +42,6 @@ class CreditData(BaseModel):
     PAY_AMT5: float
     PAY_AMT6: float
 
-# Prediction Endpoint
 @app.post("/predict/")
 def predict(data: CreditData):
     df = pd.DataFrame([data.dict()])
